@@ -1,0 +1,22 @@
+{
+  "name": "webrtc_videocalls_and_chat_app",
+  "version": "1.0.0",
+  "description": "A chat video calling and chat app with no third parties ",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "keywords": [
+    "videocalls",
+    "chatapp"
+  ],
+  "author": "kinyanjuipeterson12787@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0",
+    "nodemon": "^3.1.9",
+    "socket.io": "^4.8.1"
+  }
+}
