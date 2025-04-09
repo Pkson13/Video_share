@@ -12,6 +12,7 @@ const options = {
   cert: readFileSync("./cert.pem"),
 };
 
+app.use(express.static("./public"));
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });

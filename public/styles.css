@@ -1,0 +1,171 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+video img {
+  width: 100%;
+  height: 100%;
+}
+body {
+  background-color: #fff;
+  z-index: 0;
+}
+.modal {
+  display: flex;
+  opacity: 1;
+  flex-direction: column;
+}
+.show {
+  display: flex;
+}
+.hide {
+  display: none;
+}
+.cross {
+  position: absolute;
+  color: white;
+  height: 40px;
+  right: 20px;
+  top: -40px;
+  z-index: 101;
+}
+.cross:hover {
+  cursor: pointer;
+}
+.container {
+  width: 100vw;
+  height: 100vh;
+  /* display: flex; */
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+}
+@media (min-width: 700px) {
+  .modal {
+    position: fixed;
+    /*modal open ? body{
+        overflow: hidden;
+    } */
+    /* inset: 7rem; */
+    /* margin: auto; */
+    z-index: 100;
+    background-color: white;
+    padding: 1rem;
+    /* padding-left: -5rem; */
+    /* display: flex; */
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    height: 75%;
+    border-radius: 8px;
+    max-width: 1000px;
+    /* overflow-y: scroll; */
+  }
+  .backdrop {
+    position: fixed;
+    background-color: #000000;
+    z-index: 20;
+    height: 100%;
+    width: 100%;
+    opacity: 0.4;
+    display: flex;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  gap: 16px;
+  width: 40%;
+  background-color: #f1f0ee;
+  padding: 2.5rem 1.5rem;
+  border-radius: 8px;
+}
+.name {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 39px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  flex: 2 1;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 10px;
+  margin-bottom: 8px;
+}
+input {
+  /* width: 373px; */
+  height: 48px;
+
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+}
+input:focus {
+  border: none;
+  outline: none;
+}
+/* input::placeholder {
+  padding-left: 24px;
+  /* font-size: 20px; */
+button {
+  border-radius: 8px;
+  height: 40px;
+  padding: 0 16px;
+}
+button:hover {
+  cursor: pointer;
+}
+button[id="call"] {
+  background-color: #000000;
+  color: white;
+  font-weight: 100;
+}
+button[id="join"] {
+  background-color: white;
+  border: none;
+  box-shadow: 1px 2px 2px 2px rgba(0, 0, 0, 0.3);
+}
+.illustration {
+  max-width: 400px;
+  /* max-height: 400px; */
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+}
+
+.page {
+  height: 110vh;
+  display: grid;
+  gap: 24px;
+  padding: 4rem;
+  grid-auto-rows: 300px;
+  z-index: 0;
+}
+.box {
+  /* width: ; */
+  /* height: 200px; */
+  border: 1px solid black;
+  border-radius: 10px;
+}
+@media (min-width: 700px) {
+  .page {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-auto-rows: 300px;
+  }
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
