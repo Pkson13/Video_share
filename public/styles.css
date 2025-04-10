@@ -111,9 +111,10 @@ input:focus {
   border: none;
   outline: none;
 }
-/* input::placeholder {
+input::placeholder {
   padding-left: 24px;
-  /* font-size: 20px; */
+  font-size: 20px;
+}
 button {
   border-radius: 8px;
   height: 40px;
