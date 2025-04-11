@@ -19,7 +19,11 @@ app.get("/", (req, res) => {
 const httpsServer = https.createServer(options, app).listen(8000);
 const io = new Server(httpsServer, {
   cors: {
-    origin: ["https://localhost:8000", "https://192.168.88.181:8000"],
+    origin: [
+      "https://localhost:8000",
+      "https://192.168.88.181:8000",
+      //you can enter your local dev ip here to communicate with other devices
+    ],
   },
 });
 
@@ -82,7 +86,9 @@ io.on("connect", (socket) => {
     // const answersfilter = offers.filter(
     //   (offer) => offer.answerer_name === name
     // );
-    if (offer !== null) {
+    console.log("answer");
+    console.log(offer);
+    if (offer !== undefined) {
       // answersfilter.forEach((answer) => {
       offer.offerericecandidates.push(candidate);
       // io.to(answer.id).emit(
@@ -92,24 +98,24 @@ io.on("connect", (socket) => {
       // });
     }
 
-    if (offer == null) {
-      const offerobj = {
-        id: socket.id,
-        offer: {},
-        oname: name,
-        offerericecandidates: [],
-        answerer_socket_id: null,
-        answer: {},
-        answerericecandidates: [],
-      };
-      offerobj.offerericecandidates.push(candidate);
-      offers.push(offerobj);
-    }
+    // if (offer == null) {
+    //   const offerobj = {
+    //     id: socket.id,
+    //     offer: {},
+    //     oname: name,
+    //     offerericecandidates: [],
+    //     answerer_socket_id: null,
+    //     answer: {},
+    //     answerericecandidates: [],
+    //   };
+    //   offerobj.offerericecandidates.push(candidate);
+    //   offers.push(offerobj);
+    // }
 
     // console.log(offer);
   });
 
-  socket.on("chose-an-offer", (offerClient) => {
+  socket.on("chose-an-offer", (offerClient, name) => {
     console.log("what");
     let offer = offers.find(
       (offerServer) => offerServer.oname === offerClient.oname
@@ -118,6 +124,7 @@ io.on("connect", (socket) => {
     console.log(offer);
     offer.answer = offerClient.answer;
     offer.answerer_socket_id = socket.id;
+    offer.answerer_name = name;
     console.log("offer after update");
     console.log(offer);
     socket.emitWithAck("giveMeyourIceCandidates").then((candidates) => {

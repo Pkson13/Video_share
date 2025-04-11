@@ -1,4 +1,5 @@
 // document.addEventListener("DOMContentLoaded", () => {
+// alert("what");
 console.log(io);
 
 const socket = io();
@@ -6,14 +7,17 @@ socket.on("connect", () => {
   console.log(socket.id);
 });
 const nameinput = document.querySelector(".nameinput");
-const modelclose = document.querySelector(".cross");
+const callbtn = document.querySelector("#call");
+const jionbtn = document.querySelector("#join");
 const modal = document.querySelector(".container");
+const calls = document.querySelector(".calls-container");
 let didIOffer = false;
 let pc;
 let offers = [];
 let myicecandidates = [];
+let capturename;
 
-modelclose.addEventListener("click", () => {
+callbtn.addEventListener("click", () => {
   modal.classList.remove("show");
   modal.classList.add("hide");
   didIOffer = true;
@@ -34,6 +38,17 @@ modelclose.addEventListener("click", () => {
     });
     console.log(pc);
   });
+});
+
+jionbtn.addEventListener("click", () => {
+  modal.classList.remove("show");
+  modal.classList.add("hide");
+  calls.classList.remove("hide");
+  calls.classList.add("show");
+  didIOffer = false;
+  capturename = nameinput.value;
+
+  // didIOffer = true;
 });
 
 // const createOfferAndSetLocalDescription = async (peerconnection) => {
@@ -75,7 +90,7 @@ const createVIdeoElement = (stream, type) => {
   // console.log(stream.getTracks());
 };
 
-const createPeerConnection = async () => {
+const createPeerConnection = async (offer) => {
   const options = {
     iceCandidatePoolSize: 3,
     iceServers: [
@@ -84,7 +99,6 @@ const createPeerConnection = async () => {
       },
     ],
   };
-
   const oname = nameinput.value;
   console.log("name");
   console.log(oname);
@@ -102,9 +116,17 @@ const createPeerConnection = async () => {
     console.log("icecandiddates\n");
     myicecandidates.push(ev.candidate);
     console.log(ev.candidate);
-    if (ev.candidate !== null) {
-      socket.emit("icecandidate", ev.candidate, oname);
-    }
+    // if (ev.candidate !== null) {
+    socket.emit("icecandidate", ev.candidate, oname);
+    // }
+  };
+
+  // moved this event handler here
+  peerconnection.ontrack = (ev) => {
+    console.log("ev.strams");
+    console.log(ev.streams);
+    console.log(ev.track);
+    if (ev.track.kind === "video") createVIdeoElement(ev.track, "remote");
   };
 
   if (didIOffer) {
@@ -114,13 +136,24 @@ const createPeerConnection = async () => {
     console.log("offer" + oname);
     console.log(offer);
     socket.emit("offer", offer, oname);
+  } else {
+    await peerconnection.setRemoteDescription(offer.offer);
+    // offer.answer = await pc.createAnswer();
+    // console.log("answer");
+    // pc.setLocalDescription(offer.answer);
+    // console.log(offer.answer);
+
+    console.log("candidates");
+    console.log(offer.offerericecandidates);
+    await offer.offerericecandidates.forEach((candidate) => {
+      peerconnection.addIceCandidate(candidate);
+    });
+    // anwer = await peerconnection.createAnswer()
+    offer.answer = await peerconnection.createAnswer();
+    await peerconnection.setLocalDescription(offer.answer);
+    console.log("answer");
+    console.log(offer.answer);
   }
-  peerconnection.ontrack = (ev) => {
-    console.log("ev.strams");
-    console.log(ev.streams);
-    console.log(ev.track);
-    if (ev.track.kind === "video") createVIdeoElement(ev.track, "remote");
-  };
 
   return peerconnection;
   //   stats
@@ -133,21 +166,17 @@ const createPeerConnection = async () => {
 const answer = async (ev) => {
   const element = ev.target;
   const oname = element.value;
-
+  calls.classList.remove("show");
+  calls.classList.add("hide");
   const offer = offers.find((offer) => offer.oname === oname);
 
   offer.answerer_socket_id = socket.id;
-  await pc.setRemoteDescription(offer.offer);
-  offer.answer = await pc.createAnswer();
-  console.log("answer");
-  pc.setLocalDescription(offer.answer);
-  console.log(offer.answer);
-
-  console.log("candidates");
-  console.log(offer.offerericecandidates);
-  await offer.offerericecandidates.forEach((candidate) => {
-    pc.addIceCandidate(candidate);
+  await createPeerConnection(offer).then((peerconnection) => {
+    pc = peerconnection;
+    console.log("pc");
+    console.log(pc);
   });
+
   const config = pc.remoteDescription;
   const configl = pc.localDescription;
   console.log(pc.getConfiguration());
@@ -155,7 +184,8 @@ const answer = async (ev) => {
   console.log(configl);
   console.log("remote");
   console.log(config);
-  socket.emit("chose-an-offer", offer);
+  // console.log("")
+  socket.emit("chose-an-offer", offer, capturename);
   // socket.emit("mycandidtaes",myicecandidates)
 
   //update the local offers object
@@ -165,6 +195,7 @@ const showavAilableOffers = (offersfrmserver) => {
   const offersDiv = document.querySelector(".offers");
   offersfrmserver.forEach((offer) => {
     const button = document.createElement("button");
+    button.setAttribute("id", "join");
     button.textContent = offer.oname;
     button.value = offer.oname;
     offersDiv.appendChild(button);
