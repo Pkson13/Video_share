@@ -1,4 +1,4 @@
-import https from "https";
+import http from "http";
 import express from "express";
 import { Server } from "socket.io";
 import { readFileSync } from "node:fs";
@@ -7,16 +7,16 @@ const app = express();
 // https.createServer(app, (req,res)=>{
 // })
 
-const options = {
-  key: readFileSync("./cert-key.pem"),
-  cert: readFileSync("./cert.pem"),
-};
+// const options = {
+//   key: readFileSync("./cert-key.pem"),
+//   cert: readFileSync("./cert.pem"),
+// };
 
 app.use(express.static("./public"));
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
-const httpsServer = https.createServer(options, app).listen(8000);
+const httpsServer = http.createServer(app).listen(8000);
 const io = new Server(httpsServer, {
   cors: {
     origin: [
