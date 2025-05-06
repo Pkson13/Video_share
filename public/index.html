@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>video share</title>
     <link rel="stylesheet" href="styles.css" />
-    <script defer src="script.js"></script>
   </head>
   <body>
     <div class="container show">
@@ -27,7 +26,7 @@
             />
           </svg>
         </div>
-        <div class="form">
+        <form class="form" action="/">
           <div class="logo">
             <div class="icon">
               <svg
@@ -49,17 +48,18 @@
           </div>
           <input
             type="text"
-            name=""
-            placeholder="Enter name"
-            class="nameinput"
+            name="room"
+            placeholder="Enter room name"
+            class="roomname"
+            required
           />
-          <button id="call" type="submit">CALL</button>
-          <button id="join" type="submit">JOIN</button>
+          <button id="create-room" type="submit">Create Room</button>
+          <button id="join-room" type="submit">Join Room</button>
           <!-- <p>
             Lorem ipsum dolor sit amet consectetur adipisicing elit.<br />
             Mollitia asperiores provident
           </p> -->
-        </div>
+        </form>
         <section class="illustration">
           <svg
             width="625"
@@ -762,26 +762,49 @@
           </div>
           <div class="name">video share</div>
         </div>
-        <div class="offers">
-          <!-- <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button>
-          <button id="join">name</button> -->
+        <div class="lobby-card">
+          <div class="avatar">
+            <img src="./download.png" alt="avatar" class="avatar-image" />
+          </div>
+          <div class="action-buttons">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1"
+              stroke="currentColor"
+              class="size-6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M12 18.75H4.5a2.25 2.25 0 0 1-2.25-2.25V9m12.841 9.091L16.5 19.5m-1.409-1.409c.407-.407.659-.97.659-1.591v-9a2.25 2.25 0 0 0-2.25-2.25h-9c-.621 0-1.184.252-1.591.659m12.182 12.182L2.909 5.909M1.5 4.5l1.409 1.409"
+              />
+            </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1"
+              stroke="currentColor"
+              class="size-6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z"
+              />
+            </svg>
+          </div>
+
+          <input
+            type="text"
+            name="name"
+            placeholder="Enter name"
+            class="nameinput"
+            required
+          />
+          <button class="join-btn">Join now</button>
         </div>
       </div>
       <!-- </div> -->
@@ -803,6 +826,7 @@
     </div>
     <div class="action-buttons"></div>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="sockets.js"></script>
+    <script src="functions.js"></script>
+    <script defer src="script.js"></script>
   </body>
 </html>
