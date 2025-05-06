@@ -36,104 +36,121 @@ const io = new Server(httpsServer, {
 //   answer: Answer;
 //   answerericecandidates: IceCandidate[];
 // }
-let offers = [];
-
+// let offers = [];
+/*
+room ={
+name : "string",
+participats:[
+  {name: "name", socketid: "string", offer: "Offer", icecandidates: IceCandidate[]}
+],
+}
+*/
+let rooms = [];
 io.on("connect", (socket) => {
   console.log(socket.id);
-  if (offers.length > 0) {
-    const pending_offers = offers.filter((offer) => {
-      return offer.answerer_socket_id == null && offer.answer == null;
-    });
-    socket.emit("current-offers", pending_offers);
-  }
+  // if (offers.length > 0) {
+  //   const pending_offers = offers.filter((offer) => {
+  //     return offer.answerer_socket_id == null && offer.answer == null;
+  //   });
+  //   socket.emit("current-offers", pending_offers);
+  // }
 
-  socket.on("offer", (offer, oname) => {
-    // console.log("offers");
-    // console.log(offers);
-    const availableoffer = offers.find((aoffer) => {
-      return aoffer.oname == oname;
-    });
-    if (availableoffer == null) {
-      const offerobj = {
-        id: socket.id,
-        oname: oname,
-        offer: offer,
-        offerericecandidates: [],
-        answerer_socket_id: null,
-        answerer_name: null,
-        answer: null,
-        answerericecandidates: [],
-      };
-      offers.push(offerobj);
-    } else if (availableoffer !== null) {
-      availableoffer.offer = offer;
-      availableoffer.id = socket.id;
-    }
-    // console.log("available");
-    // console.log(availableoffer);
-
-    // console.log(offers);
+  socket.on("createRoom", (roomname) => {
+    console.log("createroom", roomname);
+    const room = {
+      name: roomname,
+      participants: [
+        {
+          name: "",
+          socketid: socket.id,
+          offer: {},
+          icecandidates: [],
+          admin: true,
+        },
+      ],
+    };
+    rooms.push(room);
   });
-  socket.on("icecandidate", (candidate, name) => {
-    // console.log(offers);
+
+  socket.on("offer", (roomname, offer, name) => {
+    console.log("offer\n", roomname, name);
+    const room = rooms.find((room) => room.name == roomname);
+    if (!room) {
+      console.log("room doesn't exist");
+      return;
+    }
+
+    const admin = room.participants.find(
+      (participant) => participant.socketid == socket.id
+    );
+    if (admin) {
+      console.log("is admin");
+      admin.name = name;
+      admin.offer = offer;
+    } else {
+      room.participants.push({ name, socketid: socket.id, offer });
+    }
+    console.log("rooms", rooms);
+  });
+
+  socket.on("icecandidate", (candidate, roomname, name) => {
+    console.log("icecandidate");
     // console.log("name");
     // console.log(name);
-    const offer = offers.find((offer) => offer.oname === name);
-    // offer.offerericecandidates.push(candidate);
-    // console.log(offer);
-    // console.log(offers);
-
-    // const answersfilter = offers.filter(
-    //   (offer) => offer.answerer_name === name
-    // );
-    console.log("answer");
-    console.log(offer);
-    if (offer !== undefined) {
-      // answersfilter.forEach((answer) => {
-      offer.offerericecandidates.push(candidate);
-      // io.to(answer.id).emit(
-      //   "answer-candidates",
-      //   answer.answerericecandidates
-      // );
-      // });
+    const room = rooms.find((room) => room.name === roomname);
+    if (!room) {
+      console.log("room doesn't exist");
+      return;
     }
-
-    // if (offer == null) {
-    //   const offerobj = {
-    //     id: socket.id,
-    //     offer: {},
-    //     oname: name,
-    //     offerericecandidates: [],
-    //     answerer_socket_id: null,
-    //     answer: {},
-    //     answerericecandidates: [],
-    //   };
-    //   offerobj.offerericecandidates.push(candidate);
-    //   offers.push(offerobj);
-    // }
-
-    // console.log(offer);
-  });
-
-  socket.on("chose-an-offer", (offerClient, name) => {
-    console.log("what");
-    let offer = offers.find(
-      (offerServer) => offerServer.oname === offerClient.oname
-    );
-    console.log("offer before update");
-    console.log(offer);
-    offer.answer = offerClient.answer;
-    offer.answerer_socket_id = socket.id;
-    offer.answerer_name = name;
-    console.log("offer after update");
-    console.log(offer);
-    socket.emitWithAck("giveMeyourIceCandidates").then((candidates) => {
-      // console.log("answerer candidates");
-      console.log(candidates);
-      offer.answerericecandidates = candidates;
-      // offer.answerer_name = name;
-      // console.log(offer);
-      socket.to(offer.id).emit("offerAccepted", offer);
+    const user = room.participants.find((participant) => {
+      return participant.name == name || participant.socketid == socket.id;
     });
+    if (!user) {
+      console.log("user doesn't exist");
+      return;
+    }
+    if (!user.icecandidates) user.icecandidates = [];
+    user.icecandidates.push(candidate);
+    // console.log("rooms", rooms, "\nroom", room);
   });
+  socket.on("joinroom", ({ roomname, username }, callback) => {
+    console.log("joinroom\n", roomname, username);
+    const room = rooms.find((room) => room.name === roomname);
+    if (!room) return;
+    callback(room.participants);
+  });
+
+  socket.on("chose-an-offer", async (roomname, offer) => {
+    console.log("what");
+    // const candidates = await socket.emitWithAck("giveMeyourIceCandidates");
+    let room = rooms.find((room) => room.name === roomname);
+    console.log(offer);
+    // offer.answerericecandidates = candidates;
+
+    // console.log("answerer candidates");
+    // offer.answerer_name = name;
+    // console.log(offer);
+    socket.to(offer.socketid).emit("offerAccepted", offer);
+  });
+  // socket.on("chose-an-offer", (offerClient, name) => {
+  //   console.log("what");
+  //   let offer = offers.find(
+  //     (offerServer) => offerServer.oname === offerClient.oname
+  //   );
+  //   console.log("offer before update");
+  //   console.log(offer);
+  //   offer.answer = offerClient.answer;
+  //   offer.answerer_socket_id = socket.id;
+  //   offer.answerer_name = name;
+  //   console.log("offer after update");
+  //   console.log(offer);
+  //   socket.emitWithAck("giveMeyourIceCandidates").then((candidates) => {
+  //     // console.log("answerer candidates");
+  //     console.log(candidates);
+  //     offer.answerericecandidates = candidates;
+  //     // offer.answerer_name = name;
+  //     // console.log(offer);
+  //     socket.to(offer.id).emit("offerAccepted", offer);
+  //   });
+  // });
 });
