@@ -25,6 +25,7 @@ let connections = [];
 let stream;
 let avatar = document.querySelector(".avatar");
 let participants;
+remotestream = new MediaStream();
 
 form.addEventListener("submit", (ev) => {
   ev.preventDefault();

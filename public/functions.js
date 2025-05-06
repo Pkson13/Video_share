@@ -4,7 +4,6 @@ const createVIdeoElement = (stream, type) => {
   video.setAttribute("controls", "");
   container.append(video);
   if (type === "remote") {
-    remotestream = new MediaStream();
     // stream.forEach((track) => {
     remotestream.addTrack(stream);
     // });
@@ -69,6 +68,7 @@ const createPeerConnection = async ({ stream, offer }) => {
     console.log(ev.streams);
     console.log(ev.track);
     if (ev.track.kind === "video") createVIdeoElement(ev.track, "remote");
+    else if (ev.track.kind === "audio") remotestream.addTrack(ev.track);
   };
 
   if (didIOffer) {
