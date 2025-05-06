@@ -150,7 +150,7 @@ body {
   /* margin: 0 auto; */
   gap: 12px;
   width: 100%;
-  max-width: 100%;
+  max-width: 50%;
   max-height: 100%;
   background-color: #fff;
   padding: 2rem 1rem;
