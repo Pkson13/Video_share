@@ -1,216 +1,164 @@
 // document.addEventListener("DOMContentLoaded", () => {
 // alert("what");
 console.log(io);
+// console.log(window.location.href);
+// console.log(window.location.pathname);
 
 const socket = io();
 socket.on("connect", () => {
   console.log(socket.id);
 });
+const roomname = document.querySelector(".roomname");
 const nameinput = document.querySelector(".nameinput");
-const callbtn = document.querySelector("#call");
-const jionbtn = document.querySelector("#join");
+const callbtn = document.querySelector("#create-room");
+const jionbtn = document.querySelector("#join-room");
+const jionbtn2 = document.querySelector(".join-btn");
 const modal = document.querySelector(".container");
-const calls = document.querySelector(".calls-container");
+const joinmodal = document.querySelector(".calls-container");
+const form = document.querySelector(".form");
 let didIOffer = false;
-let pc;
+let localpc;
 let offers = [];
 let myicecandidates = [];
-let capturename;
+let calling = false;
+let connections = [];
+let stream;
+let avatar = document.querySelector(".avatar");
+let participants;
 
-callbtn.addEventListener("click", () => {
-  modal.classList.remove("show");
-  modal.classList.add("hide");
-  didIOffer = true;
-
-  createPeerConnection().then((peerconnection) => {
-    pc = peerconnection;
-    console.log("pc");
-    socket.on("offerAccepted", (offer) => {
-      console.log("offer accepted");
-      console.log(offer);
-      console.log(offer.answerericecandidates);
-      // offerericecandidates;
-      pc.setRemoteDescription(offer.answer).then(() => {
-        offer.answerericecandidates.forEach((candidate) => {
-          pc.addIceCandidate(candidate);
-        });
-      });
-    });
-    console.log(pc);
-  });
+form.addEventListener("submit", (ev) => {
+  ev.preventDefault();
 });
 
-jionbtn.addEventListener("click", () => {
+callbtn.addEventListener("click", async () => {
+  if (!roomname.value) return;
   modal.classList.remove("show");
   modal.classList.add("hide");
-  calls.classList.remove("hide");
-  calls.classList.add("show");
-  didIOffer = false;
-  capturename = nameinput.value;
+  joinmodal.classList.add("show");
+  joinmodal.classList.remove("hide");
+  didIOffer = true;
+  calling = true;
+  stream = await gum();
+  // createVIdeoElement(stream, "local");
+  const avatar_image = document.querySelector(".avatar-image");
+  const avatar = document.querySelector(".avatar");
+  const video = document.createElement("video");
+  video.srcObject = stream;
+  await video.play();
+  avatar.removeChild(avatar_image);
+  avatar.append(video);
+  calling = true;
+  didIOffer = true;
+  socket.emit("createRoom", roomname.value);
+});
+
+jionbtn.addEventListener("click", async () => {
+  if (!roomname.value) return;
+  modal.classList.remove("show");
+  modal.classList.add("hide");
+  joinmodal.classList.add("show");
+  joinmodal.classList.remove("hide");
+  stream = await gum();
+  // createVIdeoElement(stream, "local");
+  const avatar_image = document.querySelector(".avatar-image");
+
+  const video = document.createElement("video");
+  video.srcObject = stream;
+  await video.play();
+  avatar.removeChild(avatar_image);
+  avatar.append(video);
+  calling = false;
+  didIOffer = true;
 
   // didIOffer = true;
 });
-
-// const createOfferAndSetLocalDescription = async (peerconnection) => {
-//   const offer = peerconnection.createOffer();
-//   peerconnection.setLocalDescription(offer);
-// };
-
-const gum = async () => {
-  // named the funtion gum coz getUserMedia already exists
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-
-    return stream;
-  } catch (error) {
-    console.log("something went wrong\n");
-    console.log(err);
+jionbtn2.addEventListener("click", async () => {
+  if (!nameinput.value) {
+    alert("you need to provide a name");
+    return;
   }
-};
+  localpc = await createPeerConnection({ stream });
 
-const createVIdeoElement = (stream, type) => {
-  const local = document.querySelector(`.${type}`);
-  const video = document.createElement("video");
-  video.setAttribute("controls", "");
-  local.append(video);
-  if (type === "remote") {
-    remotestream = new MediaStream();
-    // stream.forEach((track) => {
-    remotestream.addTrack(stream);
-    // });
-    video.srcObject = remotestream; // note: srcObject, not srcobject
-  } else if (type === "local") {
-    video.srcObject = stream; // note: srcObject, not srcobject
-  }
-  video.play();
-  console.log(`tracks`);
-  // console.log(stream.getTracks());
-};
-
-const createPeerConnection = async (offer) => {
-  const options = {
-    iceCandidatePoolSize: 3,
-    iceServers: [
-      {
-        urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"],
-      },
-    ],
-  };
-  const oname = nameinput.value;
-  console.log("name");
-  console.log(oname);
-  const peerconnection = new RTCPeerConnection(options);
-  const stream = await gum();
-  stream.getTracks().forEach((track) => {
-    peerconnection.addTrack(track, stream);
-  });
+  avatar.remove();
   createVIdeoElement(stream, "local");
-
-  console.log("conf");
-  console.log(peerconnection.getConfiguration());
-
-  peerconnection.onicecandidate = (ev) => {
-    console.log("icecandiddates\n");
-    myicecandidates.push(ev.candidate);
-    console.log(ev.candidate);
-    // if (ev.candidate !== null) {
-    socket.emit("icecandidate", ev.candidate, oname);
-    // }
-  };
-
-  // moved this event handler here
-  peerconnection.ontrack = (ev) => {
-    console.log("ev.strams");
-    console.log(ev.streams);
-    console.log(ev.track);
-    if (ev.track.kind === "video") createVIdeoElement(ev.track, "remote");
-  };
-
-  if (didIOffer) {
-    const offer = await peerconnection.createOffer();
-    await peerconnection.setLocalDescription(offer);
-
-    console.log("offer" + oname);
-    console.log(offer);
-    socket.emit("offer", offer, oname);
-  } else {
-    await peerconnection.setRemoteDescription(offer.offer);
-    // offer.answer = await pc.createAnswer();
-    // console.log("answer");
-    // pc.setLocalDescription(offer.answer);
-    // console.log(offer.answer);
-
-    console.log("candidates");
-    console.log(offer.offerericecandidates);
-    await offer.offerericecandidates.forEach((candidate) => {
-      peerconnection.addIceCandidate(candidate);
+  if (!calling) {
+    didIOffer = false;
+    console.log("joinroom");
+    participants = await socket.emitWithAck("joinroom", {
+      roomname: roomname.value,
+      username: nameinput.value,
     });
-    // anwer = await peerconnection.createAnswer()
-    offer.answer = await peerconnection.createAnswer();
-    await peerconnection.setLocalDescription(offer.answer);
-    console.log("answer");
-    console.log(offer.answer);
+    console.log("participants", participants);
+    for (let participant of participants) {
+      if (participant.name == nameinput.value) continue;
+      console.log("creating peer connection for", participant.name);
+      const pc = await createPeerConnection({ offer: participant, stream });
+      pc.onicegatheringstatechange = (ev) => {
+        console.log(ev.target);
+        const connection = ev.target;
+        switch (connection.iceGatheringState) {
+          case "gathering":
+            /* collection of candidates has begun */
+            break;
+          case "complete":
+            participant.answerer_name = nameinput.value;
+            participant.answerericecandidates = myicecandidates;
+            console.log("mycandidatesxxx", myicecandidates);
+            socket.emit("chose-an-offer", roomname.value, participant);
+            /* collection of candidates is finished */
+            break;
+        }
+      };
+
+      connections.push(pc);
+    }
+    // console.log("connections", connections);
   }
 
-  return peerconnection;
-  //   stats
-  //    peerconnection.getStats().then((stats) => {
-  //      console.log("stats");
-  //      console.log(stats);
-  //    });
-};
+  joinmodal.classList.remove("show");
+  joinmodal.classList.add("hide");
+});
 
-const answer = async (ev) => {
-  const element = ev.target;
-  const oname = element.value;
-  calls.classList.remove("show");
-  calls.classList.add("hide");
-  const offer = offers.find((offer) => offer.oname === oname);
-
-  offer.answerer_socket_id = socket.id;
-  await createPeerConnection(offer).then((peerconnection) => {
-    pc = peerconnection;
-    console.log("pc");
-    console.log(pc);
+socket.on("offerAccepted", (offer) => {
+  console.log("offer accepted");
+  console.log(offer);
+  console.log(offer.answerericecandidates);
+  // offerericecandidates;
+  localpc.setRemoteDescription(offer.answer).then(() => {
+    offer.answerericecandidates.forEach((candidate) => {
+      localpc.addIceCandidate(candidate);
+    });
   });
+  console.log(localpc);
+});
 
-  const config = pc.remoteDescription;
-  const configl = pc.localDescription;
-  console.log(pc.getConfiguration());
-  console.log("local");
-  console.log(configl);
-  console.log("remote");
-  console.log(config);
-  // console.log("")
-  socket.emit("chose-an-offer", offer, capturename);
-  // socket.emit("mycandidtaes",myicecandidates)
-
-  //update the local offers object
-};
-
-const showavAilableOffers = (offersfrmserver) => {
-  const offersDiv = document.querySelector(".offers");
-  offersfrmserver.forEach((offer) => {
-    const button = document.createElement("button");
-    button.setAttribute("id", "join");
-    button.textContent = offer.oname;
-    button.value = offer.oname;
-    offersDiv.appendChild(button);
-    offers.push(offer);
-    // button.addEventListener("click", (ev) => {
-    // console.log(ev.target);
-    // });
-    button.addEventListener("click", answer);
-  });
-};
-
-socket.on("current-offers", (offers) => {
+socket.on("current-offers", async (offers) => {
   console.log("current offers");
   console.log(offers);
   showavAilableOffers(offers);
+  const url = new URL(window.location.href);
+
+  const join = url.searchParams.get("join");
+  if (join) {
+    const offer = offers.find((offer) => offer.oname === join);
+
+    offer.answerer_socket_id = socket.id;
+    await createPeerConnection(offer).then((peerconnection) => {
+      pc = peerconnection;
+      console.log("pc");
+      console.log(pc);
+    });
+
+    const config = pc.remoteDescription;
+    const configl = pc.localDescription;
+    console.log(pc.getConfiguration());
+    console.log("local");
+    console.log(configl);
+    console.log("remote");
+    console.log(config);
+    // console.log("")
+    socket.emit("chose-an-offer", offer, capturename);
+  }
 });
 socket.on("answer-candidates", (candidate) => {
   console.log("answer-candidates");
