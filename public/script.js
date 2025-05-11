@@ -15,6 +15,7 @@ const jionbtn = document.querySelector("#join-room");
 const jionbtn2 = document.querySelector(".join-btn");
 const modal = document.querySelector(".container");
 const joinmodal = document.querySelector(".calls-container");
+const btncontainer = document.querySelector(".cbuttons");
 const form = document.querySelector(".form");
 let didIOffer = false;
 let localpc;
@@ -60,6 +61,7 @@ jionbtn.addEventListener("click", async () => {
   joinmodal.classList.add("show");
   joinmodal.classList.remove("hide");
   stream = await gum();
+
   // createVIdeoElement(stream, "local");
   const avatar_image = document.querySelector(".avatar-image");
 
@@ -118,6 +120,8 @@ jionbtn2.addEventListener("click", async () => {
 
   joinmodal.classList.remove("show");
   joinmodal.classList.add("hide");
+  btncontainer.classList.add("show");
+  btncontainer.classList.remove("hide");
 });
 
 socket.on("offerAccepted", (offer) => {
