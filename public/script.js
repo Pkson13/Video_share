@@ -1,8 +1,9 @@
 // document.addEventListener("DOMContentLoaded", () => {
 // alert("what");
 console.log(io);
-// console.log(window.location.href);
-// console.log(window.location.pathname);
+console.log(window.location.href);
+console.log(window.location.pathname);
+const url = new URL(window.location.href);
 
 const socket = io();
 socket.on("connect", () => {
@@ -17,6 +18,14 @@ const modal = document.querySelector(".container");
 const joinmodal = document.querySelector(".calls-container");
 const btncontainer = document.querySelector(".cbuttons");
 const form = document.querySelector(".form");
+
+const hangup = document.querySelector(".hangup-container");
+const sharebtn = document.querySelector(".sharebtn");
+const pausevid = document.querySelector(".stop-video");
+const screenShare = document.querySelector(".share-screen");
+
+//
+
 let didIOffer = false;
 let localpc;
 let offers = [];
@@ -27,10 +36,6 @@ let stream;
 let avatar = document.querySelector(".avatar");
 let participants;
 remotestream = new MediaStream();
-
-form.addEventListener("submit", (ev) => {
-  ev.preventDefault();
-});
 
 callbtn.addEventListener("click", async () => {
   if (!roomname.value) return;
@@ -124,56 +129,55 @@ jionbtn2.addEventListener("click", async () => {
   btncontainer.classList.remove("hide");
 });
 
-socket.on("offerAccepted", (offer) => {
-  console.log("offer accepted");
-  console.log(offer);
-  console.log(offer.answerericecandidates);
-  // offerericecandidates;
-  localpc.setRemoteDescription(offer.answer).then(() => {
-    offer.answerericecandidates.forEach((candidate) => {
-      localpc.addIceCandidate(candidate);
-    });
-  });
-  console.log(localpc);
+form.addEventListener("submit", (ev) => {
+  ev.preventDefault();
+});
+hangup.addEventListener("click", (ev) => {
+  ev.stopPropagation();
+  window.location.reload();
 });
 
-socket.on("current-offers", async (offers) => {
-  console.log("current offers");
-  console.log(offers);
-  showavAilableOffers(offers);
-  const url = new URL(window.location.href);
+sharebtn.addEventListener("click", async (ev) => {
+  console.log(url.href);
+  url.searchParams.set("room", roomname.value);
+  await navigator.clipboard.writeText(url.href);
+  alert("room link copied to clipboard");
+});
 
-  const join = url.searchParams.get("join");
-  if (join) {
-    const offer = offers.find((offer) => offer.oname === join);
+pausevid.addEventListener("click", () => {
+  const video = document.querySelector("video");
+  console.log("pause btn");
+  video.paused ? video.play() : video.pause();
+});
 
-    offer.answerer_socket_id = socket.id;
-    await createPeerConnection(offer).then((peerconnection) => {
-      pc = peerconnection;
-      console.log("pc");
-      console.log(pc);
-    });
-
-    const config = pc.remoteDescription;
-    const configl = pc.localDescription;
-    console.log(pc.getConfiguration());
-    console.log("local");
-    console.log(configl);
-    console.log("remote");
-    console.log(config);
-    // console.log("")
-    socket.emit("chose-an-offer", offer, capturename);
+screenShare.addEventListener("click", async () => {
+  let tracks = stream.getVideoTracks();
+  for (const track of tracks) {
+    console.log("removing tracks");
+    stream.removeTrack(track);
   }
-});
-socket.on("answer-candidates", (candidate) => {
-  console.log("answer-candidates");
-  console.log(candidate);
-  // showavAilableOffers(offers);
+  const stream2 = await gum({ screen: true });
+  tracks = stream2.getVideoTracks();
+  for (const track of tracks) {
+    console.log("removing tracks");
+    stream.addTrack(track);
+  }
+
+  const Transceivers = localpc.getTransceivers();
+  console.log(Transceivers);
+  const res = Transceivers.find((Transceiver) => {
+    return (
+      Transceiver.sender.track.kind == "video" ||
+      Transceiver.receiver.track.kind == "video"
+    );
+  });
+
+  console.log(res);
+  await res.sender.replaceTrack(tracks[0]);
 });
 
-socket.on("giveMeyourIceCandidates", (callback) => {
-  console.log("my candidates");
-  console.log(myicecandidates);
-
-  callback(myicecandidates);
-});
+let url_room = url.searchParams.get("room");
+if (url_room) {
+  roomname.value = url_room;
+  jionbtn.click();
+}
