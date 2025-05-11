@@ -13,19 +13,28 @@ const createVIdeoElement = (stream, type) => {
     video.srcObject = remotestream; // note: srcObject, not srcobject
   } else if (type === "local") {
     video.srcObject = stream; // note: srcObject, not srcobject
+    video.muted = true;
   }
   video.play();
   console.log(`tracks`);
   // console.log(stream.getTracks());
 };
 
-const gum = async () => {
+const gum = async ({ screen } = { screen: false }) => {
   // named the funtion gum coz getUserMedia already exists
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
+    let stream;
+    if (screen) {
+      stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
+      });
+    } else {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+    }
 
     return stream;
   } catch (error) {
