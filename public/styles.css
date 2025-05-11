@@ -315,6 +315,9 @@ svg {
   height: 1.5rem;
   width: 1.5rem;
 }
+.cbuttons svg:hover {
+  cursor: pointer;
+}
 .hangup-container {
   background-color: #d93025;
   height: 2.5rem;
@@ -324,6 +327,9 @@ svg {
   justify-content: center;
   align-items: center;
   overflow: hidden;
+}
+.hangup-container:hover {
+  cursor: pointer;
 }
 
 .hangup {
