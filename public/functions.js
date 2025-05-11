@@ -1,8 +1,11 @@
 const createVIdeoElement = (stream, type) => {
-  const container = document.querySelector(`.${type}`);
+  const streamContainer = document.querySelector(".streams");
+  const div = document.createElement("div");
+  div.setAttribute(`${type}`, "");
+  streamContainer.append(div);
   const video = document.createElement("video");
-  video.setAttribute("controls", "");
-  container.append(video);
+  // video.setAttribute("controls", "");
+  div.append(video);
   if (type === "remote") {
     // stream.forEach((track) => {
     remotestream.addTrack(stream);
