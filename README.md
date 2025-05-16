@@ -77,8 +77,8 @@ https://localhost:8000/index.html
 ### Step 1: Initiate a Call
 
 - Open the app in a browser (e.g., `http://localhost:8000/index.html`)
-- Enter your **name**
-- Click the **CALL** button  
+- Enter the **room Name**
+- Click the **Create Room** button  
   You will be redirected to a waiting screen.
 
 ### Step 2: Join a Call
@@ -86,17 +86,9 @@ https://localhost:8000/index.html
 ![homepage](assets/image.png)
 
 - Open the same app in another browser window or on another device
-- Enter your **name**
-- Click the **JOIN** button  
-   You’ll be taken to a screen where you can see the list of users available to call.
-  ![calls](assets/jion.png)
-
-### Step 3: Start the Call
-
-- Select the user you want to connect with.
-- The call will begin once the connection is established.
-
----
+- Enter the **room Name**
+- Click the **Join Room** button
+  ![calls](assets/join.png)
 
 ## 🔧 Running the App on Other Devices (Local Network Access)
 
