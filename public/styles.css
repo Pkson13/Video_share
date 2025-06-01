@@ -43,6 +43,29 @@ body {
 .cross:hover {
   cursor: pointer;
 }
+
+.spinner {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  border: 10px solid transparent;
+  border-top: 10px solid white;
+  /* animation: spin duration timing-function delay iteration-count direction fill-mode; */
+  animation: spin 1s linear infinite;
+  z-index: 100;
+  background-color: black;
+  /* opacity: 0.4; */
+}
+.show_s {
+  display: block;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 .container {
   width: 100vw;
   height: 100vh;
