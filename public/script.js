@@ -23,6 +23,7 @@ const hangup = document.querySelector(".hangup-container");
 const sharebtn = document.querySelector(".sharebtn");
 const pausevid = document.querySelector(".stop-video");
 const screenShare = document.querySelector(".share-screen");
+const spinner = document.querySelector(".spinner-container");
 
 //
 
@@ -85,9 +86,16 @@ jionbtn2.addEventListener("click", async () => {
     alert("you need to provide a name");
     return;
   }
+  avatar.remove();
+
+  joinmodal.classList.remove("show");
+  joinmodal.classList.add("hide");
+  btncontainer.classList.add("show");
+  btncontainer.classList.remove("hide");
+  spinner.classList.remove("hide");
+  spinner.classList.add("show");
   localpc = await createPeerConnection({ stream });
 
-  avatar.remove();
   createVIdeoElement(stream, "local");
   if (!calling) {
     didIOffer = false;
@@ -122,11 +130,8 @@ jionbtn2.addEventListener("click", async () => {
     }
     // console.log("connections", connections);
   }
-
-  joinmodal.classList.remove("show");
-  joinmodal.classList.add("hide");
-  btncontainer.classList.add("show");
-  btncontainer.classList.remove("hide");
+  spinner.classList.remove("show");
+  spinner.classList.add("hide");
 });
 
 form.addEventListener("submit", (ev) => {
